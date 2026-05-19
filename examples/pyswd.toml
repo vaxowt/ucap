@@ -1,0 +1,100 @@
+# =============================================================================
+# pyswd.toml — pySWD 后端示例（仅支持 ST-Link）
+# pySWD 比 pyOCD 更快、更轻量，但仅兼容 ST-Link 调试器。
+# 用法:
+#   ucap rw  -c examples/pyswd.toml
+#   ucap mon -c examples/pyswd.toml
+# =============================================================================
+
+# 读写频率 (Hz)
+rw_freq = 1000
+# 实际读写频率偏差阈值（百分比），低于该值报警/报错
+rw_freq_warning_tolerance = 0.001
+rw_freq_error_tolerance = 0.01
+
+[backend]
+name = 'pyswd'
+# 调试器频率 (Hz)。0 最高速度（默认），正值指定频率，负值使用后端默认值。此处显式设置 4 MHz
+freq = 4000000
+# 调试器序列号。连接多台设备时需要指定，仅一台时可留空
+# serial_no = ''
+
+[save]
+enable = true
+dir = 'data/pyswd_session'
+auto_name = true
+save_figure = true
+
+[plot]
+show = true
+
+[[plot.figures]]
+name = 'Sensor & Control'
+axes = [['ax_sensor'], ['ax_control']]
+sharex = 'col'
+
+[plot.axes.ax_sensor.kwargs]
+ylabel = 'Value'
+xlabel = 'Time (s)'
+
+[plot.axes.ax_control.kwargs]
+ylabel = 'Control Output'
+
+# =============================================================================
+# pre_vars: 采集前读取芯片信息并初始化
+# =============================================================================
+
+[[pre_vars]]
+name = 'device_id'
+address = 0xE0042000
+format = '<I'
+
+[[pre_vars]]
+name = 'uid'
+address = 0x1FFF7A10
+format = '<III'
+struct = ['uid0', 'uid1', 'uid2']
+
+# =============================================================================
+# vars: 持续读写的寄存器
+# =============================================================================
+
+# --- 内部温度传感器 (STM32 ADC 通道) ---
+[[vars]]
+name = 'temperature'
+address = 0x4001204C
+format = '<H'
+expr = '(x * 3.3 / 4096 - 0.76) / 0.0025 + 25'
+plot = { axis = 'ax_sensor' }
+
+# --- 供电电压检测 ---
+[[vars]]
+name = 'vrefint'
+address = 0x40012050
+format = '<H'
+expr = '3.3 * 4096 / x'
+plot = { axis = 'ax_sensor' }
+
+# --- PWM 占空比 ---
+[[vars]]
+name = 'pwm_duty'
+address = 0x40000434
+format = '<I'
+plot = { axis = 'ax_control' }
+
+# =============================================================================
+# post_vars: 采集后读取运行状态
+# =============================================================================
+
+[[post_vars]]
+name = 'systick_val'
+address = 0xE000E018
+format = '<I'
+
+[[post_vars]]
+name = 'fault_status'
+address = 0x40000444
+format = '<I'
+
+[extra]
+metadata = { description = 'pySWD demo — ST-Link only, tested on STM32F4', backend = 'pyswd' }

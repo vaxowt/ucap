@@ -1,0 +1,94 @@
+# =============================================================================
+# openocd.toml — OpenOCD 后端示例
+#
+# ⚠ 使用前必须先手动启动 OpenOCD 守护进程，例如:
+#   openocd -f interface/stlink.cfg -f target/stm32f4x.cfg
+# 然后保持 OpenOCD 运行，再执行 ucap:
+#   ucap rw  -c examples/openocd.toml
+#   ucap mon -c examples/openocd.toml
+# =============================================================================
+
+# 读写频率 (Hz)
+rw_freq = 500
+
+[backend]
+name = 'openocd'
+# 调试器频率 (Hz)。0 最高速度（默认），正值指定频率，负值使用后端默认值。此处不设置，使用最高速度
+# freq = 0
+
+[backend.openocd]
+host = 'localhost'
+port = 4444
+
+[save]
+enable = true
+dir = 'data/openocd_session'
+auto_name = true
+save_figure = true
+
+[plot]
+show = true
+
+[[plot.figures]]
+name = 'Core & Peripherals'
+axes = [['ax_core'], ['ax_periph']]
+sharex = 'col'
+
+[plot.axes.ax_core.kwargs]
+ylabel = 'Core Value'
+xlabel = 'Time (s)'
+
+[plot.axes.ax_periph.kwargs]
+ylabel = 'Peripheral Value'
+
+# =============================================================================
+# pre_vars: 采集前读取目标信息
+# =============================================================================
+
+[[pre_vars]]
+name = 'cpuid'
+address = 0xE000ED00
+format = '<I'
+
+[[pre_vars]]
+name = 'target_info'
+address = 0xE0042000
+format = '<I'
+
+# =============================================================================
+# vars: 持续读写的寄存器
+# =============================================================================
+
+# --- 内部温度传感器 ---
+[[vars]]
+name = 'temp_sensor'
+address = 0x4001204C
+format = '<H'
+expr = '(x * 3.3 / 4096 - 0.76) / 0.0025 + 25'
+plot = { axis = 'ax_core' }
+
+# --- 系统节拍计数器 ---
+[[vars]]
+name = 'systick_cvr'
+address = 0xE000E018
+format = '<I'
+plot = { axis = 'ax_core' }
+
+# --- 随机数发生器（如目标支持）---
+[[vars]]
+name = 'rng_data'
+address = 0x50060808
+format = '<I'
+plot = { axis = 'ax_periph' }
+
+# =============================================================================
+# post_vars: 采集后读取状态
+# =============================================================================
+
+[[post_vars]]
+name = 'dwt_cyccnt'
+address = 0xE0001004
+format = '<I'
+
+[extra]
+metadata = { description = 'OpenOCD backend demo', note = 'Ensure OpenOCD daemon is running before using this config' }

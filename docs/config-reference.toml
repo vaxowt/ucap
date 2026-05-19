@@ -1,0 +1,185 @@
+# 日志等级，debug, info, warning, error
+log_level = 'info'
+# 读写频率，不设置则采用最高频率
+# rw_freq =
+# 实际读写频率相比设定读写频率（rw_freq）的偏差阈值（百分比），低于该值报警
+rw_freq_warning_tolerance = 0.001
+# 实际读写频率相比设定读写频率（rw_freq）的偏差阈值（百分比），低于该值报错并退出
+rw_freq_error_tolerance = 0.01
+# ELF 文件路径。如果 var 的 address 是变量名，则必须填写
+# elf_file =
+# 读写 pre_vars 与读写 vars 之间的延迟，单位 s
+pre_delay = 0.0
+# 读写 vars 与读写 post_vars 之间的延迟，单位 s。mon 模式下不生效
+post_delay = 0.0
+
+[backend]
+# 后端名称，pyswd, pyocd, openocd, mock。若为空，默认使用 pyocd
+# pyswd 会更快，但是只支持 ST-Link
+# openocd 需要先启动 OpenOCD 守护进程（默认连接 localhost:4444）
+# mock 为模拟后端，无需硬件，用于测试
+# name =
+# 调试器序列号。不设置则使用唯一的设备。连接了多个设备需要指定序列号
+serial_no = ''
+# 调试器频率 (Hz)。0 表示最高速度（默认），正值使用该频率，负值使用后端默认值
+# freq = 0
+
+# pyocd 库配置，目标芯片。若为空，默认为 cortex_m
+# 使用 `pyocd list --targets` 寻找支持的目标
+[backend.pyocd]
+# target =
+
+# openocd 库配置
+[backend.openocd]
+host = 'localhost'
+port = 4444
+
+# mock 后端配置，读回值的高斯噪声标准差（写入值作为均值）。设 0 则精确返回写入值
+[backend.mock]
+sigma = 5.0
+
+[save]
+# 是否保存
+enable = true
+# 数据保存父目录
+dir = 'data'
+# 数据保存子目录名称
+# name =
+# 自动命名子目录
+auto_name = true
+# 若子目录不空，是否覆盖
+override = false
+# 数据文件名称
+data_filename = 'data'
+# 元数据文件名称
+metadata_filename = 'metadata'
+# 配置文件名称
+config_filename = 'config'
+# 是否保存图片
+save_figure = false
+# 是否保存配置
+save_config = true
+# 元数据 json 缩进
+metadata_indent = 2
+
+# 持续读写的目标寄存器，会保存为 data['data']
+[[vars]]
+# 名称，str，必填
+name =
+# 寄存器地址，int（地址）或 str（变量名），如果是纯 expr，不用填写，其他情况必填
+# address =
+# 寄存器格式，str，如果是纯 expr，不用填写，其他情况必填
+# 参考：https://docs.python.org/3/library/struct.html#format-strings
+# format =
+# 设定值。若给定，该寄存器为写入模式，留空为读取模式
+# value =
+# 数据结构，list。若给定，读取到的数据会据此自动 unpack 成 dict
+# 若给定的名字以 "_" 开头，该项会被丢弃
+# struct =
+# 示例：读取 2 个相同类型的数据。最后输出的数据形式为
+#       data['data'][var_name] = {'name1': [short, short, ...], 'name2': [short, short, ...]}
+# format = '<hh'
+# struct = ['name1', 'name2']
+# 示例：读取 2 个不同类型的数据，并丢弃 padding。最后输出的数据形式为
+#       data['data'][var_name] = {'name1': [short, short, ...], 'name2': [int, int, ...]}
+# format = '<hhI'
+# struct = ['name1', '_pad1', 'name2']
+# 绘图设置
+# 若数据为多值或结构体，会按 plot 设置绘制多条曲线，曲线 label 为 "var_name.field_name"
+# 多值无 struct 时，field_name 为索引字符串（'0', '1', ...）
+# 有 struct 时，field_name 为 struct 成员名
+plot = {axis = 'default', type = 'plot', kwargs = {}}
+# 示例 1：为结构体中的成员分别定义绘图设置，未定义的将不会被画出
+# struct = ['name1', 'name2', 'name3']
+# plot = {name1 = {axis='ax1'}, name2 = {axis='default'}}
+# 表达式，可对读取值做运算或定义纯计算寄存器
+# 格式：字符串（统一变换）或字典（每个成员分别变换）
+# 在表达式中，x 代表当前寄存器的原始值，可以引用其他寄存器的名称
+# 支持使用 numpy 函数（如 sqrt, sin 等）
+# expr =
+# 示例 1：比例因子
+# expr = 'x * 3.3 / 4096'
+# 示例 2：引用其他寄存器
+# expr = 'x * voltage'        # voltage 必须在此 var 之前定义
+# 示例 3：纯计算寄存器（不需要 address 和 format，expr 必须为字符串）
+# name = 'power'
+# expr = 'voltage * current'
+# 示例 4：struct/unified expr，对每个成员应用相同变换
+# struct = ['ax', 'ay', 'az']
+# expr = 'x * 0.001'
+# 示例 5：struct/dict expr，对每个成员应用不同变换，未指定的成员保持原值
+# struct = ['ax', 'ay', 'az']
+# expr = {ax = 'x * 9.81', ay = 'x * 9.81', az = 'x * 9.81 + 1'}
+# expr = {ax = 'x * 9.81'}   # ay, az 保持原值
+# 示例 6：array（多值无 struct）/unified expr，对每个元素应用相同变换
+# format = '<hh'
+# expr = 'x * 0.001'
+# 示例 7：array/dict expr，对指定元素应用不同变换，键为元素索引（从 0 开始）
+# format = '<hh'
+# expr = {0 = 'x * 2', 1 = 'x * 3'}
+# expr = {0 = 'x * 2'}        # 索引 1 保持原值
+
+# 仅在读写 vars 之前读写一次的寄存器，保存在 metadata['pre_data']
+# [[pre_vars]]
+# 同 vars 设置
+
+# 仅在读写 vars 之后读写一次的寄存器，保存在 metadata['post_data']。mon 模式下不生效
+# [[post_vars]]
+# 同 vars 设置
+
+[plot]
+# 是否显示图片
+show = true
+
+[[plot.figures]]
+# 图片名字，必填
+# name =
+# axes 布局，必填
+# 示例：单个 axis
+# axes = 'ax1'
+# 示例：3x1 布局
+# axes = ['ax1', 'ax2', 'ax3']
+# 示例：1x3 布局
+# axes = [['ax1'], ['ax2'], ['ax3']]
+# 示例：2x2 布局，且启用一个留空
+# axes = [['ax1', 'ax2'], [false, 'ax3']]
+# 以下选项参考：https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html
+# figsize =
+# 可设值：none, all, row, col, true/false
+sharex = false
+# 可设值：none, all, row, col, true/false
+sharey = false
+# 可设值：constrained, compressed, tight, none, 留空
+layout = 'tight'
+
+[plot.axes.<axis_name>]
+# 参考：https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes
+kwargs = {}
+
+[mon]
+# 实时监控视图的窗口显示时长（秒）
+view_window = 10.0
+# 刷新间隔（毫秒）
+refresh_interval = 10
+# 状态栏更新间隔（毫秒）
+status_interval = 1000
+# 队列大小，0 表示不限制
+queue_size = 0
+# 绘图线宽
+linewidth = 2
+# 主题，light 或 dark
+theme = 'light'
+# 是否对显示数据进行降采样
+downsampling = true
+# 是否启用抗锯齿。采集速率较高时，可能导致卡顿
+antialias = false
+# 是否启用 OpenGL
+use_opengl = false
+# 探针（probe）模式是否插值显示。false 时 vline 吸附到最近的数据点
+probe_interpolation = false
+
+[extra]
+# 自定义元数据。会和采集到的元数据保存在一起，metadata['extra']
+metadata = {}
+# 自定义数据。会和采集到的数据保存在一起，data['extra']
+data = {}

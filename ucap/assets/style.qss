@@ -1,0 +1,267 @@
+/* =========================================================
+ * Global
+ * ========================================================= */
+
+QMainWindow {
+    background: %(bg_primary)s;
+}
+
+QWidget {
+    background: %(bg_primary)s;
+    color: %(text_primary)s;
+
+    font-family: "Segoe UI", "Noto Sans", sans-serif;
+}
+
+
+/* =========================================================
+ * Scroll Area
+ * ========================================================= */
+
+QScrollArea {
+    border: none;
+}
+
+
+QScrollBar:vertical {
+    background: %(bg_secondary)s;
+
+    width: 8px;
+
+    border-radius: 4px;
+}
+
+
+QScrollBar::handle:vertical {
+    background: %(border)s;
+
+    border-radius: 4px;
+
+    min-height: 20px;
+}
+
+
+QScrollBar::handle:vertical:hover {
+    background: %(border_hover)s;
+}
+
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+
+/* =========================================================
+ * Toolbar Buttons
+ * ========================================================= */
+
+QPushButton[variant="toolbar"] {
+    border: 1px solid %(border)s;
+
+    border-radius: 6px;
+
+    padding: 6px 14px;
+
+    background: %(bg_primary)s;
+
+    color: %(text_secondary)s;
+
+    font-size: 12px;
+
+    font-weight: 500;
+}
+
+
+QPushButton[variant="toolbar"]:hover {
+    background: %(bg_hover)s;
+
+    border-color: %(border_hover)s;
+}
+
+
+QPushButton[variant="toolbar"]:pressed {
+    background: %(bg_pressed)s;
+}
+
+
+QPushButton[variant="toolbar"]:checked {
+    background: %(bg_checked)s;
+
+    border-color: %(border_checked)s;
+
+    color: %(accent)s;
+}
+
+
+QPushButton[variant="toolbar"]:disabled {
+    color: %(text_muted)s;
+
+    border-color: %(border)s;
+}
+
+
+/* =========================================================
+ * Toggle All Button
+ * ========================================================= */
+
+QPushButton[variant="panel-btn"] {
+    border: 1px solid %(border)s;
+
+    border-radius: 6px;
+
+    background: %(bg_secondary)s;
+
+    padding: 4px 8px;
+
+    font-size: 11px;
+}
+
+
+QPushButton[variant="panel-btn"]:hover {
+    background: %(bg_hover)s;
+}
+
+
+/* =========================================================
+ * Labels
+ * ========================================================= */
+
+QLabel[variant="panel-title"] {
+    font-size: 13px;
+
+    font-weight: bold;
+
+    background: none;
+
+    color: %(text_secondary)s;
+}
+
+
+QStatusBar::item {
+    border: none;
+}
+
+QStatusBar QLabel {
+    color: %(text_muted)s;
+    font-size: 11px;
+    font-family: monospace;
+    margin: 0px 2px;
+}
+
+QStatusBar QLabel#status-serial {
+    qproperty-alignment: 'AlignLeft | AlignVCenter';
+}
+
+QStatusBar QLabel#status-frequency,
+QStatusBar QLabel#status-fps,
+QStatusBar QLabel#status-memory,
+QStatusBar QLabel#status-elapsed,
+QStatusBar QLabel#status-queue {
+    qproperty-alignment: 'AlignRight | AlignVCenter';
+}
+
+QLabel#status-frequency {
+    min-width: 100px;
+}
+
+QLabel#status-fps {
+    min-width: 50px;
+}
+
+QLabel#status-memory {
+    min-width: 80px;
+}
+
+QLabel#status-elapsed {
+    min-width: 80px;
+}
+
+QLabel#status-queue {
+    min-width: 50px;
+}
+
+/* =========================================================
+ * Checkbox
+ * ========================================================= */
+
+QCheckBox {
+    spacing: 6px;
+
+    font-size: 11px;
+
+    color: %(text_secondary)s;
+
+    background: none;
+}
+
+
+QCheckBox::indicator {
+    width: 14px;
+
+    height: 14px;
+
+    border-radius: 3px;
+
+    border: 1px solid %(border)s;
+
+    background: none;
+}
+
+
+QCheckBox::indicator:checked {
+}
+
+
+/* =========================================================
+ * Separator
+ * ========================================================= */
+
+QFrame[variant="separator"] {
+    color: %(separator)s;
+}
+
+
+/* =========================================================
+ * Probe Label
+ * ========================================================= */
+
+QLabel[variant="probe"] {
+    background-color: %(probe_bg)s;
+
+    border: 1px solid %(border)s;
+
+    border-radius: 6px;
+
+    padding: 6px 10px;
+
+    color: %(text_secondary)s;
+
+    font-family: monospace;
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+ * Channel Panel
+ * ========================================================= */
+
+QWidget#channel-panel {
+    background: %(bg_secondary)s;
+
+    /* border: 1px solid %(border)s; */
+
+    border-radius: 8px;
+}
+
+QWidget#channel-panel-scroll {
+    background: %(bg_secondary)s;
+}
+
+/* =========================================================
+ * Plot
+ * ========================================================= */
+
+QWidget#plot-widget {
+}

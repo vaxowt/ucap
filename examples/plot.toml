@@ -1,0 +1,182 @@
+# =============================================================================
+# plot.toml — 绘图配置功能展示
+# 演示多 figure、多 axis 布局、不同 plot type、sharex/sharey/figsize
+# 用法: ucap mon -c examples/plot.toml
+# =============================================================================
+
+rw_freq = 200
+
+[backend]
+name = 'mock'
+
+[backend.mock]
+sigma = 2.0
+
+[save]
+enable = true
+dir = 'data/plot_demo'
+save_figure = true
+
+[plot]
+show = true
+
+# =============================================================================
+# Figure 1: 2×2 子图布局，多种绘图类型
+# =============================================================================
+[[plot.figures]]
+name = 'Mixed Plot Types'
+axes = [
+    ['ax_plot',    'ax_stem'],
+    ['ax_scatter', 'ax_plot2'],
+]
+sharex = 'col'
+sharey = false
+figsize = [12, 8]
+layout = 'constrained'
+
+# =============================================================================
+# Figure 2: 单列三行，共享 x 轴
+# =============================================================================
+[[plot.figures]]
+name = 'Comparison View'
+axes = [['ax_speed'], ['ax_current'], ['ax_position']]
+sharex = 'all'
+figsize = [10, 6]
+
+# =============================================================================
+# Figure 3: 简单的多值寄存器对比
+# =============================================================================
+[[plot.figures]]
+name = 'Multi-value Array'
+axes = [['ax_array']]
+sharex = false
+
+# =============================================================================
+# Axis 配置
+# =============================================================================
+
+[plot.axes.ax_plot.kwargs]
+ylabel = 'Sine Wave'
+xlabel = 'Time (s)'
+
+[plot.axes.ax_stem.kwargs]
+ylabel = 'Stem Values'
+
+[plot.axes.ax_scatter.kwargs]
+ylabel = 'Scatter'
+
+[plot.axes.ax_plot2.kwargs]
+ylabel = 'Cosine'
+xlabel = 'Time (s)'
+
+[plot.axes.ax_speed.kwargs]
+ylabel = 'Speed (RPM)'
+
+[plot.axes.ax_current.kwargs]
+ylabel = 'Current (A)'
+
+[plot.axes.ax_position.kwargs]
+ylabel = 'Position (rad)'
+xlabel = 'Time (s)'
+
+[plot.axes.ax_array.kwargs]
+ylabel = 'Array Elements'
+xlabel = 'Sample Index'
+
+# =============================================================================
+# pre_vars: 播种初始值（mock 模式下设定各寄存器的写入值）
+# =============================================================================
+
+[[pre_vars]]
+name = 'sine'
+address = 0x20000010
+format = '<f'
+value = 0.0
+
+[[pre_vars]]
+name = 'cosine'
+address = 0x20000014
+format = '<f'
+value = 1.0
+
+[[pre_vars]]
+name = 'speed'
+address = 0x20000020
+format = '<f'
+value = 1500.0
+
+[[pre_vars]]
+name = 'current'
+address = 0x20000024
+format = '<f'
+value = 2.5
+
+[[pre_vars]]
+name = 'position'
+address = 0x20000028
+format = '<f'
+value = 0.0
+
+[[pre_vars]]
+name = 'phase'
+address = 0x2000002C
+format = '<f'
+value = 1.57
+
+[[pre_vars]]
+name = 'triaxial'
+address = 0x20000030
+format = '<hhh'
+value = [0, 0, 0]
+
+# =============================================================================
+# vars
+# =============================================================================
+
+# --- 标量，普通 plot ---
+[[vars]]
+name = 'sine'
+address = 0x20000010
+format = '<f'
+plot = { axis = 'ax_plot' }
+
+# --- 标量，stem 类型 ---
+[[vars]]
+name = 'cosine'
+address = 0x20000014
+format = '<f'
+plot = { axis = 'ax_stem', type = 'stem' }
+
+# --- 标量，scatter 类型 ---
+[[vars]]
+name = 'speed'
+address = 0x20000020
+format = '<f'
+plot = { axis = 'ax_scatter', type = 'scatter' }
+
+# --- 标量，第二个 figure 的轴 ---
+[[vars]]
+name = 'current'
+address = 0x20000024
+format = '<f'
+plot = { axis = 'ax_current' }
+
+[[vars]]
+name = 'position'
+address = 0x20000028
+format = '<f'
+plot = { axis = 'ax_position' }
+
+# --- 标量，共享第一个 figure 的 ax_plot2 ---
+[[vars]]
+name = 'phase'
+address = 0x2000002C
+format = '<f'
+plot = { axis = 'ax_plot2' }
+
+# --- 多值（无 struct），自动绘制三条线 ---
+[[vars]]
+name = 'triaxial'
+address = 0x20000030
+format = '<hhh'
+plot = { axis = 'ax_array' }

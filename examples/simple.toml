@@ -1,0 +1,33 @@
+# =============================================================================
+# simple.toml — 最小配置示例
+# 用法: ucap rw -c examples/simple.toml
+# =============================================================================
+
+# 读写频率 (Hz)，不设置则采用最高频率
+rw_freq = 100
+
+[backend]
+name = 'mock'
+
+[save]
+enable = true
+dir = 'data'
+auto_name = true
+
+# =============================================================================
+# vars: 持续读写的寄存器
+# =============================================================================
+
+[[vars]]
+name = 'sensor_value'
+address = 0x20000000
+format = '<f'
+
+[[vars]]
+name = 'status'
+address = 0x20000004
+format = '<II'
+struct = ['flag1', 'flag2']
+
+[extra]
+metadata = { description = 'Simple demo configuration' }
