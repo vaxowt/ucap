@@ -2,6 +2,10 @@
 
 > A non-invasive DAP-based tool for MCU data acquisition, monitoring, and visualization.
 
+<p align="center">
+  <video src="https://github.com/user-attachments/assets/5b1926d9-4c7e-4628-97e3-223b6fda863d" controls width="500px"></video>
+</p>
+
 ## Installation
 
 ```bash
