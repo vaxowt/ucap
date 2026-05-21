@@ -138,7 +138,7 @@ add_completion_class(PowerShellComplete)
 @click.group(CLI_NAME, cls=_OrderedGroup, invoke_without_command=True)
 @click.option('-l', '--list', is_flag=True, help='list probes')
 @_verbose_callback_opt
-@click.version_option()
+@click.version_option(package_name="python-ucap")
 @click.pass_context
 def cli(ctx, list):
     if list:

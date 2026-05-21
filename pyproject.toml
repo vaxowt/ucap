@@ -1,6 +1,6 @@
 [project]
 name = "python-ucap"
-version = "0.7.2"
+version = "0.7.3"
 description = "A non-invasive DAP-based tool for MCU data acquisition, monitoring, and visualization."
 readme = "README.md"
 requires-python = ">=3.11"
