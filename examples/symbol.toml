@@ -1,0 +1,140 @@
+# =============================================================================
+# symbol.toml — ELF symbol resolution example
+# Uses `elf_file` config so you can reference C variable names instead of raw
+# addresses in `address`. Supports both peripheral registers (from SVD/mmio
+# symbols) and firmware global variables.
+#
+# Usage:
+#   ucap rw  -c examples/symbol.toml          # Ctrl+C to stop
+#   ucap mon -c examples/symbol.toml          # Real-time GUI monitor
+#   ucap sym -e path/to/firmware.elf          # Browse available symbols
+# =============================================================================
+
+# Path to ELF file. When set, any `address` that is a string is treated as
+# a symbol name and resolved to its runtime address automatically.
+elf_file = 'path/to/firmware.elf'
+
+# Read/Write frequency (Hz). When using symbol names the probe still reads
+# the resolved address at this rate — no firmware changes needed.
+# rw_freq = 500
+
+[backend]
+name = 'pyocd'
+
+[backend.pyocd]
+target = 'stm32f407vg'
+
+[save]
+enable = true
+dir = 'data/symbol_session'
+auto_name = true
+save_figure = true
+save_config = true
+
+[plot]
+show = true
+
+[[plot.figures]]
+name = 'Peripheral Registers'
+axes = [['ax_adc'], ['ax_timer'], ['ax_gpio']]
+sharex = 'col'
+
+[[plot.figures]]
+name = 'Firmware Globals'
+axes = [['ax_sensor'], ['ax_state']]
+
+[plot.axes.ax_adc.kwargs]
+ylabel = 'ADC Voltage (V)'
+
+[plot.axes.ax_timer.kwargs]
+ylabel = 'Timer (us)'
+
+[plot.axes.ax_gpio.kwargs]
+ylabel = 'GPIO State'
+
+[plot.axes.ax_sensor.kwargs]
+ylabel = 'Sensor Value'
+
+[plot.axes.ax_state.kwargs]
+ylabel = 'State Machine'
+xlabel = 'Time (s)'
+
+# =============================================================================
+# pre_vars: Read once before acquisition — use symbol names for clarity
+# =============================================================================
+
+[[pre_vars]]
+name = 'device_id'
+address = 'DBGMCU->IDCODE'     # Peripheral register via SVD symbol
+format = '<I'
+
+[[pre_vars]]
+name = 'fw_version'
+address = 'g_firmware_version'  # Global variable from firmware code
+format = '<H'
+
+# =============================================================================
+# vars: Variables to read/write continuously — mix of HW regs and globals
+# =============================================================================
+
+# --- Peripheral register: ADC1 data register ---
+[[vars]]
+name = 'adc1_voltage'
+address = 'ADC1->DR'           # Hardware register, resolved from ELF
+format = '<H'
+plot = { axis = 'ax_adc' }
+expr = 'x * 3.3 / 4096'
+
+# --- Peripheral register: TIM2 counter value ---
+[[vars]]
+name = 'timer2_us'
+address = 'TIM2->CNT'          # Timer counter register
+format = '<I'
+plot = { axis = 'ax_timer' }
+
+# --- Peripheral register: GPIOA output data ---
+[[vars]]
+name = 'gpioa_state'
+address = 'GPIOA->ODR'         # GPIO output data register
+format = '<I'
+plot = { axis = 'ax_gpio' }
+
+# --- Firmware global variable: sensor reading buffered by ADC ISR ---
+[[vars]]
+name = 'sensor_raw'
+address = 'g_sensor_value'     # Firmware global, updated in interrupt
+format = '<H'
+plot = { axis = 'ax_sensor' }
+
+# --- Firmware global variable: state machine index ---
+[[vars]]
+name = 'state_machine'
+address = 'g_current_state'    # Another global variable
+format = '<B'
+plot = { axis = 'ax_state' }
+
+# --- Computed var: derived from a firmware global ---
+[[vars]]
+name = 'sensor_celsius'
+expr = '(sensor_raw * 3.3 / 4096 - 0.76) / 0.0025 + 25'
+plot = { axis = 'ax_sensor' }
+
+# =============================================================================
+# post_vars: Read once after acquisition, using symbol names
+# =============================================================================
+
+[[post_vars]]
+name = 'systick_ms'
+address = 'SysTick->VAL'       # SysTick current value register
+format = '<I'
+
+[[post_vars]]
+name = 'error_count'
+address = 'g_error_count'      # Global error counter
+format = '<I'
+
+[extra]
+metadata = {
+  description = 'ELF symbol demo — addresses resolved from firmware.elf',
+  note = 'Replace path/to/firmware.elf with your actual ELF file path'
+}
