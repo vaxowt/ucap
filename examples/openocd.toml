@@ -1,19 +1,19 @@
 # =============================================================================
-# openocd.toml — OpenOCD 后端示例
+# openocd.toml — OpenOCD backend example
 #
-# ⚠ 使用前必须先手动启动 OpenOCD 守护进程，例如:
+# ⚠ You must start the OpenOCD daemon manually before using this config, e.g.:
 #   openocd -f interface/stlink.cfg -f target/stm32f4x.cfg
-# 然后保持 OpenOCD 运行，再执行 ucap:
-#   ucap rw  -c examples/openocd.toml
-#   ucap mon -c examples/openocd.toml
+# Keep OpenOCD running, then execute ucap:
+#   ucap rw  -c examples/openocd.toml       # Continuous read/write (Ctrl+C to stop)
+#   ucap mon -c examples/openocd.toml       # Real-time monitor with GUI
 # =============================================================================
 
-# 读写频率 (Hz)
+# Read/Write frequency (Hz)
 rw_freq = 500
 
 [backend]
 name = 'openocd'
-# 调试器频率 (Hz)。0 最高速度（默认），正值指定频率，负值使用后端默认值。此处不设置，使用最高速度
+# Debugger frequency (Hz). 0 = max speed (default), positive = specific freq, negative = backend default. Unset here, uses max speed
 # freq = 0
 
 [backend.openocd]
@@ -42,7 +42,7 @@ xlabel = 'Time (s)'
 ylabel = 'Peripheral Value'
 
 # =============================================================================
-# pre_vars: 采集前读取目标信息
+# pre_vars: Read target info before acquisition
 # =============================================================================
 
 [[pre_vars]]
@@ -56,10 +56,10 @@ address = 0xE0042000
 format = '<I'
 
 # =============================================================================
-# vars: 持续读写的寄存器
+# vars: Variables to read/write continuously
 # =============================================================================
 
-# --- 内部温度传感器 ---
+# --- Internal temperature sensor ---
 [[vars]]
 name = 'temp_sensor'
 address = 0x4001204C
@@ -67,14 +67,14 @@ format = '<H'
 expr = '(x * 3.3 / 4096 - 0.76) / 0.0025 + 25'
 plot = { axis = 'ax_core' }
 
-# --- 系统节拍计数器 ---
+# --- System tick counter ---
 [[vars]]
 name = 'systick_cvr'
 address = 0xE000E018
 format = '<I'
 plot = { axis = 'ax_core' }
 
-# --- 随机数发生器（如目标支持）---
+# --- Random number generator (if target supports it) ---
 [[vars]]
 name = 'rng_data'
 address = 0x50060808
@@ -82,7 +82,7 @@ format = '<I'
 plot = { axis = 'ax_periph' }
 
 # =============================================================================
-# post_vars: 采集后读取状态
+# post_vars: Read status after acquisition
 # =============================================================================
 
 [[post_vars]]

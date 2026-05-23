@@ -1,26 +1,26 @@
 # =============================================================================
-# pyocd.toml — pyOCD 后端示例，连接具体目标芯片
-# 用法:
-#   ucap rw  -c examples/pyocd.toml        # 单次读写
-#   ucap mon -c examples/pyocd.toml        # 实时监测
+# pyocd.toml — pyOCD backend example, connecting to a specific target chip
+# Usage:
+#   ucap rw  -c examples/pyocd.toml        # Continuous read/write (Ctrl+C to stop)
+#   ucap mon -c examples/pyocd.toml        # Real-time monitor with GUI
 #
-# 先确认目标芯片可用:
+# First verify the target chip is available:
 #   pyocd list --targets
 # =============================================================================
 
-# 读写频率 (Hz)
+# Read/Write frequency (Hz)
 # rw_freq = 500
 
 [backend]
 name = 'pyocd'
 
 [backend.pyocd]
-# 指定目标芯片型号（使用 `pyocd list --targets` 查看支持列表）
+# Target chip model (use `pyocd list --targets` to see supported list)
 target = 'stm32f407vg'
 
-# 调试器频率 (Hz)。0 最高速度（默认），正值指定频率，负值使用后端默认值。此处不设置，使用最高速度
+# Debugger frequency (Hz). 0 = max speed (default), positive = specific freq, negative = backend default. Unset here, uses max speed
 # freq = 0
-# 调试器序列号，若仅连接一个设备可留空
+# Debugger serial number, leave empty if only one device connected
 # serial_no = ''
 
 [save]
@@ -58,7 +58,7 @@ refresh_interval = 50
 theme = 'dark'
 
 # =============================================================================
-# pre_vars: 采集前初始化/校验
+# pre_vars: Initialize/verify before acquisition
 # =============================================================================
 
 [[pre_vars]]
@@ -72,10 +72,10 @@ address = 0x1FFF7A22
 format = '<H'
 
 # =============================================================================
-# vars: 持续读写的寄存器
+# vars: Variables to read/write continuously
 # =============================================================================
 
-# --- STM32F407 ADC1 数据寄存器 ---
+# --- STM32F407 ADC1 data variable ---
 [[vars]]
 name = 'adc1_data'
 address = 0x4001204C
@@ -83,14 +83,14 @@ format = '<H'
 plot = { axis = 'ax_adc' }
 expr = 'x * 3.3 / 4096'
 
-# --- STM32F407 TIM2 计数器 ---
+# --- STM32F407 TIM2 counter ---
 [[vars]]
 name = 'timer2_cnt'
 address = 0x40000024
 format = '<I'
 plot = { axis = 'ax_timer' }
 
-# --- STM32F407 GPIOA ODR (输出数据寄存器) ---
+# --- STM32F407 GPIOA ODR (output data variable) ---
 [[vars]]
 name = 'gpioa_odr'
 address = 0x40020014
@@ -98,7 +98,7 @@ format = '<I'
 plot = { axis = 'ax_gpio' }
 
 # =============================================================================
-# post_vars: 采集后读取状态
+# post_vars: Read status after acquisition
 # =============================================================================
 
 [[post_vars]]

@@ -1,185 +1,185 @@
-# 日志等级，debug, info, warning, error
+# Log level: debug, info, warning, error
 log_level = 'info'
-# 读写频率，不设置则采用最高频率
+# Read/Write frequency (Hz). If unset, uses maximum frequency
 # rw_freq =
-# 实际读写频率相比设定读写频率（rw_freq）的偏差阈值（百分比），低于该值报警
+# Actual read/write frequency deviation threshold (%), warns when below this
 rw_freq_warning_tolerance = 0.001
-# 实际读写频率相比设定读写频率（rw_freq）的偏差阈值（百分比），低于该值报错并退出
+# Actual read/write frequency deviation threshold (%), errors out when below this
 rw_freq_error_tolerance = 0.01
-# ELF 文件路径。如果 var 的 address 是变量名，则必须填写
+# ELF file path. Required if var address is a variable name
 # elf_file =
-# 读写 pre_vars 与读写 vars 之间的延迟，单位 s
+# Delay between pre_vars and vars read/write, in seconds
 pre_delay = 0.0
-# 读写 vars 与读写 post_vars 之间的延迟，单位 s。mon 模式下不生效
+# Delay between vars and post_vars read/write, in seconds. Not effective in mon mode
 post_delay = 0.0
 
 [backend]
-# 后端名称，pyswd, pyocd, openocd, mock。若为空，默认使用 pyocd
-# pyswd 会更快，但是只支持 ST-Link
-# openocd 需要先启动 OpenOCD 守护进程（默认连接 localhost:4444）
-# mock 为模拟后端，无需硬件，用于测试
+# Backend name: pyswd, pyocd, openocd, mock. If empty, defaults to pyocd
+# pyswd is faster but only supports ST-Link
+# openocd requires starting the OpenOCD daemon first (default: localhost:4444)
+# mock is a simulated backend for testing without hardware
 # name =
-# 调试器序列号。不设置则使用唯一的设备。连接了多个设备需要指定序列号
+# Debugger serial number. Leave empty if only one device is connected. Required when multiple devices are connected
 serial_no = ''
-# 调试器频率 (Hz)。0 表示最高速度（默认），正值使用该频率，负值使用后端默认值
+# Debugger frequency (Hz). 0 = max speed (default), positive = specific freq, negative = backend default
 # freq = 0
 
-# pyocd 库配置，目标芯片。若为空，默认为 cortex_m
-# 使用 `pyocd list --targets` 寻找支持的目标
+# pyOCD configuration, target chip. If empty, defaults to cortex_m
+# Use `pyocd list --targets` to find supported targets
 [backend.pyocd]
 # target =
 
-# openocd 库配置
+# OpenOCD configuration
 [backend.openocd]
 host = 'localhost'
 port = 4444
 
-# mock 后端配置，读回值的高斯噪声标准差（写入值作为均值）。设 0 则精确返回写入值
+# Mock backend configuration: stddev of Gaussian noise added to readback (write value is mean). Set 0 for exact written value
 [backend.mock]
 sigma = 5.0
 
 [save]
-# 是否保存
+# Enable saving
 enable = true
-# 数据保存父目录
+# Data parent directory
 dir = 'data'
-# 数据保存子目录名称
+# Data subdirectory name
 # name =
-# 自动命名子目录
+# Auto-name subdirectory
 auto_name = true
-# 若子目录不空，是否覆盖
+# Override if subdirectory is not empty
 override = false
-# 数据文件名称
+# Data file name
 data_filename = 'data'
-# 元数据文件名称
+# Metadata file name
 metadata_filename = 'metadata'
-# 配置文件名称
+# Config file name
 config_filename = 'config'
-# 是否保存图片
+# Save plot images
 save_figure = false
-# 是否保存配置
+# Save configuration
 save_config = true
-# 元数据 json 缩进
+# Metadata JSON indent
 metadata_indent = 2
 
-# 持续读写的目标寄存器，会保存为 data['data']
+# Target variables to read/write continuously, saved as data['data']
 [[vars]]
-# 名称，str，必填
+# Name, str, required
 name =
-# 寄存器地址，int（地址）或 str（变量名），如果是纯 expr，不用填写，其他情况必填
+# Variable address, int (address) or str (variable name). Not needed for pure expr; required otherwise
 # address =
-# 寄存器格式，str，如果是纯 expr，不用填写，其他情况必填
-# 参考：https://docs.python.org/3/library/struct.html#format-strings
+# Variable format, str. Not needed for pure expr; required otherwise
+# Reference: https://docs.python.org/3/library/struct.html#format-strings
 # format =
-# 设定值。若给定，该寄存器为写入模式，留空为读取模式
+# Set value. If given, the variable is in write mode; leave empty for read mode
 # value =
-# 数据结构，list。若给定，读取到的数据会据此自动 unpack 成 dict
-# 若给定的名字以 "_" 开头，该项会被丢弃
+# Data structure, list. If given, read data is automatically unpacked into a dict
+# Entries starting with "_" are discarded
 # struct =
-# 示例：读取 2 个相同类型的数据。最后输出的数据形式为
+# Example: read 2 values of the same type. Output format:
 #       data['data'][var_name] = {'name1': [short, short, ...], 'name2': [short, short, ...]}
 # format = '<hh'
 # struct = ['name1', 'name2']
-# 示例：读取 2 个不同类型的数据，并丢弃 padding。最后输出的数据形式为
+# Example: read 2 values of different types and discard padding. Output format:
 #       data['data'][var_name] = {'name1': [short, short, ...], 'name2': [int, int, ...]}
 # format = '<hhI'
 # struct = ['name1', '_pad1', 'name2']
-# 绘图设置
-# 若数据为多值或结构体，会按 plot 设置绘制多条曲线，曲线 label 为 "var_name.field_name"
-# 多值无 struct 时，field_name 为索引字符串（'0', '1', ...）
-# 有 struct 时，field_name 为 struct 成员名
+# Plot settings
+# For multi-value or struct vars, multiple lines are plotted according to plot config, labeled as "var_name.field_name"
+# Multi-value without struct: field_name is the index string ('0', '1', ...)
+# With struct: field_name is the struct member name
 plot = {axis = 'default', type = 'plot', kwargs = {}}
-# 示例 1：为结构体中的成员分别定义绘图设置，未定义的将不会被画出
+# Example 1: define plot settings per struct member; undefined members are not plotted
 # struct = ['name1', 'name2', 'name3']
 # plot = {name1 = {axis='ax1'}, name2 = {axis='default'}}
-# 表达式，可对读取值做运算或定义纯计算寄存器
-# 格式：字符串（统一变换）或字典（每个成员分别变换）
-# 在表达式中，x 代表当前寄存器的原始值，可以引用其他寄存器的名称
-# 支持使用 numpy 函数（如 sqrt, sin 等）
+# Expression for transforming read values or defining computed-only variables
+# Format: string (uniform transform) or dict (per-member transform)
+# In expressions, x represents the raw variable value; you can reference other variable names
+# Supports numpy functions (sqrt, sin, etc.)
 # expr =
-# 示例 1：比例因子
+# Example 1: scale factor
 # expr = 'x * 3.3 / 4096'
-# 示例 2：引用其他寄存器
-# expr = 'x * voltage'        # voltage 必须在此 var 之前定义
-# 示例 3：纯计算寄存器（不需要 address 和 format，expr 必须为字符串）
+# Example 2: reference another variable
+# expr = 'x * voltage'        # voltage must be defined before this var
+# Example 3: computed-only variable (no address/format needed, expr must be string)
 # name = 'power'
 # expr = 'voltage * current'
-# 示例 4：struct/unified expr，对每个成员应用相同变换
+# Example 4: struct/unified expr, apply same transformation to each member
 # struct = ['ax', 'ay', 'az']
 # expr = 'x * 0.001'
-# 示例 5：struct/dict expr，对每个成员应用不同变换，未指定的成员保持原值
+# Example 5: struct/dict expr, apply different transformations per member; unspecified members keep original value
 # struct = ['ax', 'ay', 'az']
 # expr = {ax = 'x * 9.81', ay = 'x * 9.81', az = 'x * 9.81 + 1'}
-# expr = {ax = 'x * 9.81'}   # ay, az 保持原值
-# 示例 6：array（多值无 struct）/unified expr，对每个元素应用相同变换
+# expr = {ax = 'x * 9.81'}   # ay, az keep original value
+# Example 6: array (multi-value without struct)/unified expr, apply same transformation to each element
 # format = '<hh'
 # expr = 'x * 0.001'
-# 示例 7：array/dict expr，对指定元素应用不同变换，键为元素索引（从 0 开始）
+# Example 7: array/dict expr, apply different transformations to specific elements; keys are element indices (0-based)
 # format = '<hh'
 # expr = {0 = 'x * 2', 1 = 'x * 3'}
-# expr = {0 = 'x * 2'}        # 索引 1 保持原值
+# expr = {0 = 'x * 2'}        # index 1 keeps original value
 
-# 仅在读写 vars 之前读写一次的寄存器，保存在 metadata['pre_data']
+# Variables read/written once before vars read/write, saved in metadata['pre_data']
 # [[pre_vars]]
-# 同 vars 设置
+# Same settings as vars
 
-# 仅在读写 vars 之后读写一次的寄存器，保存在 metadata['post_data']。mon 模式下不生效
+# Variables read/written once after vars read/write, saved in metadata['post_data']. Not effective in mon mode
 # [[post_vars]]
-# 同 vars 设置
+# Same settings as vars
 
 [plot]
-# 是否显示图片
+# Show plot window
 show = true
 
 [[plot.figures]]
-# 图片名字，必填
+# Figure name, required
 # name =
-# axes 布局，必填
-# 示例：单个 axis
+# Axes layout, required
+# Example: single axis
 # axes = 'ax1'
-# 示例：3x1 布局
+# Example: 3x1 layout
 # axes = ['ax1', 'ax2', 'ax3']
-# 示例：1x3 布局
+# Example: 1x3 layout
 # axes = [['ax1'], ['ax2'], ['ax3']]
-# 示例：2x2 布局，且启用一个留空
+# Example: 2x2 layout with one empty slot
 # axes = [['ax1', 'ax2'], [false, 'ax3']]
-# 以下选项参考：https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html
+# Reference: https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.subplots.html
 # figsize =
-# 可设值：none, all, row, col, true/false
+# Options: none, all, row, col, true/false
 sharex = false
-# 可设值：none, all, row, col, true/false
+# Options: none, all, row, col, true/false
 sharey = false
-# 可设值：constrained, compressed, tight, none, 留空
+# Options: constrained, compressed, tight, none, empty
 layout = 'tight'
 
 [plot.axes.<axis_name>]
-# 参考：https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes
+# Reference: https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.html#matplotlib.axes.Axes
 kwargs = {}
 
 [mon]
-# 实时监控视图的窗口显示时长（秒）
+# Real-time monitor view window duration (seconds)
 view_window = 10.0
-# 刷新间隔（毫秒）
+# Refresh interval (milliseconds)
 refresh_interval = 10
-# 状态栏更新间隔（毫秒）
+# Status bar update interval (milliseconds)
 status_interval = 1000
-# 队列大小，0 表示不限制
+# Queue size, 0 means unlimited
 queue_size = 0
-# 绘图线宽
+# Plot line width
 linewidth = 2
-# 主题，light 或 dark
+# Theme: light or dark
 theme = 'light'
-# 是否对显示数据进行降采样
+# Downsample display data
 downsampling = true
-# 是否启用抗锯齿。采集速率较高时，可能导致卡顿
+# Enable anti-aliasing. May cause lag at high acquisition rates
 antialias = false
-# 是否启用 OpenGL
+# Enable OpenGL
 use_opengl = false
-# 探针（probe）模式是否插值显示。false 时 vline 吸附到最近的数据点
+# Probe mode interpolation. When false, vline snaps to nearest data point
 probe_interpolation = false
 
 [extra]
-# 自定义元数据。会和采集到的元数据保存在一起，metadata['extra']
+# Custom metadata, merged with captured metadata as metadata['extra']
 metadata = {}
-# 自定义数据。会和采集到的数据保存在一起，data['extra']
+# Custom data, merged with captured data as data['extra']
 data = {}

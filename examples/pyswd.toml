@@ -1,22 +1,22 @@
 # =============================================================================
-# pyswd.toml — pySWD 后端示例（仅支持 ST-Link）
-# pySWD 比 pyOCD 更快、更轻量，但仅兼容 ST-Link 调试器。
-# 用法:
-#   ucap rw  -c examples/pyswd.toml
-#   ucap mon -c examples/pyswd.toml
+# pyswd.toml — pySWD backend example (ST-Link only)
+# pySWD is faster and lighter than pyOCD, but only supports ST-Link debuggers.
+# Usage:
+#   ucap rw  -c examples/pyswd.toml        # Continuous read/write (Ctrl+C to stop)
+#   ucap mon -c examples/pyswd.toml        # Real-time monitor with GUI
 # =============================================================================
 
-# 读写频率 (Hz)
+# Read/Write frequency (Hz)
 rw_freq = 1000
-# 实际读写频率偏差阈值（百分比），低于该值报警/报错
+# Actual read/write frequency deviation threshold (%), warns/errors below this
 rw_freq_warning_tolerance = 0.001
 rw_freq_error_tolerance = 0.01
 
 [backend]
 name = 'pyswd'
-# 调试器频率 (Hz)。0 最高速度（默认），正值指定频率，负值使用后端默认值。此处显式设置 4 MHz
+# Debugger frequency (Hz). 0 = max speed (default), positive = specific freq, negative = backend default. Explicitly set to 4 MHz here
 freq = 4000000
-# 调试器序列号。连接多台设备时需要指定，仅一台时可留空
+# Debugger serial number. Required when multiple devices are connected; leave empty for single device
 # serial_no = ''
 
 [save]
@@ -41,7 +41,7 @@ xlabel = 'Time (s)'
 ylabel = 'Control Output'
 
 # =============================================================================
-# pre_vars: 采集前读取芯片信息并初始化
+# pre_vars: Read chip info and initialize before acquisition
 # =============================================================================
 
 [[pre_vars]]
@@ -56,10 +56,10 @@ format = '<III'
 struct = ['uid0', 'uid1', 'uid2']
 
 # =============================================================================
-# vars: 持续读写的寄存器
+# vars: Variables to read/write continuously
 # =============================================================================
 
-# --- 内部温度传感器 (STM32 ADC 通道) ---
+# --- Internal temperature sensor (STM32 ADC channel) ---
 [[vars]]
 name = 'temperature'
 address = 0x4001204C
@@ -67,7 +67,7 @@ format = '<H'
 expr = '(x * 3.3 / 4096 - 0.76) / 0.0025 + 25'
 plot = { axis = 'ax_sensor' }
 
-# --- 供电电压检测 ---
+# --- Supply voltage detection ---
 [[vars]]
 name = 'vrefint'
 address = 0x40012050
@@ -75,7 +75,7 @@ format = '<H'
 expr = '3.3 * 4096 / x'
 plot = { axis = 'ax_sensor' }
 
-# --- PWM 占空比 ---
+# --- PWM duty cycle ---
 [[vars]]
 name = 'pwm_duty'
 address = 0x40000434
@@ -83,7 +83,7 @@ format = '<I'
 plot = { axis = 'ax_control' }
 
 # =============================================================================
-# post_vars: 采集后读取运行状态
+# post_vars: Read runtime status after acquisition
 # =============================================================================
 
 [[post_vars]]

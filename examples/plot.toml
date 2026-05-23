@@ -1,7 +1,7 @@
 # =============================================================================
-# plot.toml — 绘图配置功能展示
-# 演示多 figure、多 axis 布局、不同 plot type、sharex/sharey/figsize
-# 用法: ucap mon -c examples/plot.toml
+# plot.toml — Plot configuration showcase
+# Demonstrates multi-figure, multi-axis layout, different plot types, sharex/sharey/figsize
+# Usage: ucap mon -c examples/plot.toml       # Real-time monitor with GUI
 # =============================================================================
 
 rw_freq = 200
@@ -21,7 +21,7 @@ save_figure = true
 show = true
 
 # =============================================================================
-# Figure 1: 2×2 子图布局，多种绘图类型
+# Figure 1: 2×2 subplot layout, multiple plot types
 # =============================================================================
 [[plot.figures]]
 name = 'Mixed Plot Types'
@@ -35,7 +35,7 @@ figsize = [12, 8]
 layout = 'constrained'
 
 # =============================================================================
-# Figure 2: 单列三行，共享 x 轴
+# Figure 2: Single column, three rows, shared x-axis
 # =============================================================================
 [[plot.figures]]
 name = 'Comparison View'
@@ -44,7 +44,7 @@ sharex = 'all'
 figsize = [10, 6]
 
 # =============================================================================
-# Figure 3: 简单的多值寄存器对比
+# Figure 3: Simple multi-value variable comparison
 # =============================================================================
 [[plot.figures]]
 name = 'Multi-value Array'
@@ -52,7 +52,7 @@ axes = [['ax_array']]
 sharex = false
 
 # =============================================================================
-# Axis 配置
+# Axis Configuration
 # =============================================================================
 
 [plot.axes.ax_plot.kwargs]
@@ -84,7 +84,7 @@ ylabel = 'Array Elements'
 xlabel = 'Sample Index'
 
 # =============================================================================
-# pre_vars: 播种初始值（mock 模式下设定各寄存器的写入值）
+# pre_vars: Seed initial values (set write values for variables in mock mode)
 # =============================================================================
 
 [[pre_vars]]
@@ -133,28 +133,28 @@ value = [0, 0, 0]
 # vars
 # =============================================================================
 
-# --- 标量，普通 plot ---
+# --- Scalar, regular plot ---
 [[vars]]
 name = 'sine'
 address = 0x20000010
 format = '<f'
 plot = { axis = 'ax_plot' }
 
-# --- 标量，stem 类型 ---
+# --- Scalar, stem type ---
 [[vars]]
 name = 'cosine'
 address = 0x20000014
 format = '<f'
 plot = { axis = 'ax_stem', type = 'stem' }
 
-# --- 标量，scatter 类型 ---
+# --- Scalar, scatter type ---
 [[vars]]
 name = 'speed'
 address = 0x20000020
 format = '<f'
 plot = { axis = 'ax_scatter', type = 'scatter' }
 
-# --- 标量，第二个 figure 的轴 ---
+# --- Scalar, second figure axis ---
 [[vars]]
 name = 'current'
 address = 0x20000024
@@ -167,14 +167,14 @@ address = 0x20000028
 format = '<f'
 plot = { axis = 'ax_position' }
 
-# --- 标量，共享第一个 figure 的 ax_plot2 ---
+# --- Scalar, sharing ax_plot2 on first figure ---
 [[vars]]
 name = 'phase'
 address = 0x2000002C
 format = '<f'
 plot = { axis = 'ax_plot2' }
 
-# --- 多值（无 struct），自动绘制三条线 ---
+# --- Multi-value (no struct), auto-plots three lines ---
 [[vars]]
 name = 'triaxial'
 address = 0x20000030

@@ -1,9 +1,9 @@
 # =============================================================================
-# simple.toml — 最小配置示例
-# 用法: ucap rw -c examples/simple.toml
+# simple.toml — Minimal config example
+# Usage: ucap rw -c examples/simple.toml      # Continuous read/write (Ctrl+C to stop)
 # =============================================================================
 
-# 读写频率 (Hz)，不设置则采用最高频率
+# Read/Write frequency (Hz). If unset, uses maximum frequency
 rw_freq = 100
 
 [backend]
@@ -15,7 +15,7 @@ dir = 'data'
 auto_name = true
 
 # =============================================================================
-# vars: 持续读写的寄存器
+# vars: Variables to read/write continuously
 # =============================================================================
 
 [[vars]]

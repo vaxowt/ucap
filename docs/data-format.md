@@ -1,12 +1,12 @@
-## 采集数据文件结构
+## Captured Data File Structure
 
 * `config.save.dir/config.save.name/`
-  * `metadata.json`: 元数据，json 格式
-  * `data.pkl`: 数据，pickle 格式
-  * `config.toml` (optional): 配置，toml 格式
-  * `figure_name.png` (optional, multiple): 图片，png 格式
+  * `metadata.json`: Metadata, JSON format
+  * `data.pkl`: Data, pickle format
+  * `config.toml` (optional): Configuration, TOML format
+  * `figure_name.png` (optional, multiple): Plot image, PNG format
 
-## 数据内容格式
+## Data Content Format
 
 ### metadata
 
@@ -34,19 +34,19 @@
 }
 ```
 
-### 数据结构定义
+### Data Structure Definition
 
 ```python
 VarData = {
     'var_single_value': [v1, v2, ..., vn],
-    # 多值 var（有 struct 或无 struct），统一为 dict 格式
+    # Multi-value var (with or without struct), normalized to dict format
     'var_multi_value': {
-        'field_or_index_0': [v1, v2, ..., vn],   # struct 成员名或索引字符串
+        'field_or_index_0': [v1, v2, ..., vn],   # struct member name or index string
         'field_or_index_1': [v1, v2, ..., vn],
     },
-    # 带有 expr 的 var，数据格式取决于 var.type:
-    # - 标量 expr: 与 single_value 相同
-    # - dict expr 或 struct+expr 或 multi+expr: 与 var_multi_value 相同
+    # Var with expr, data format depends on var.type:
+    # - Scalar expr: same as single_value
+    # - dict expr or struct+expr or multi+expr: same as var_multi_value
     ...
 }
 ```
