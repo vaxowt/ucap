@@ -4,6 +4,10 @@ dynamic = ["version"]
 description = "A non-invasive DAP-based tool for MCU data acquisition, monitoring, and visualization."
 readme = "README.md"
 requires-python = ">=3.11"
+authors = [
+    { name = "vaxowt", email = "vaxowt@gmail.com" },
+]
+
 dependencies = [
     "click>=8.2.1",
     "matplotlib>=3.10.3",
@@ -18,12 +22,13 @@ dependencies = [
     "tomlkit>=0.15.0",
 ]
 
+[project.urls]
+Homepage = "https://github.com/vaxowt/ucap"
+Repository = "https://github.com/vaxowt/ucap"
+
 [build-system]
 requires = ["setuptools>=64", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
-
-[[tool.uv.index]]
-url = "https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
 
 [tool.uv.sources]
 pyswd = { git = "https://github.com/cortexm/pyswd" }
