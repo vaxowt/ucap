@@ -6,7 +6,7 @@ from multiprocessing.synchronize import Event as MpEvent
 from typing import Any
 
 from ucap.config import Config, Var
-from ucap.constants import LOGGER_NAME
+from ucap.constants import LOG_FORMAT, LOGGER_NAME
 from ucap.expression import apply_expr
 from ucap.probe import ProbeConnectionError, create_probe, rw_vars
 
@@ -95,6 +95,10 @@ def reader_process(cfg: Config, queue: Any, stop_event: MpEvent,
                    pause_event: MpEvent):
     """Run in a separate process: connect to probe, read variables, send data."""
     logger = logging.getLogger(LOGGER_NAME)
+    if not logger.handlers:
+        handler = logging.StreamHandler()
+        handler.setFormatter(logging.Formatter(LOG_FORMAT))
+        logger.addHandler(handler)
     logger.setLevel(cfg.log_level.upper())
 
     try:
