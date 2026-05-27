@@ -5,6 +5,7 @@
 
 # Read/Write frequency (Hz). If unset, uses maximum frequency
 rw_freq = 100
+rw_duration = 0
 
 [backend]
 name = 'mock'

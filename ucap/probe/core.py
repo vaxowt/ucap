@@ -1,5 +1,6 @@
 import logging
 import signal
+import threading
 import time
 
 from ucap.config import Var
@@ -28,14 +29,15 @@ def rw_vars(probe: BaseProbe, vars: list[Var]) -> dict:
 
 
 def continuous_rw_vars(probe: BaseProbe, vars: list[Var],
-                       freq: float | None = None) -> tuple[list[float], dict]:
+                       freq: float | None = None,
+                       duration: float = 0.) -> tuple[list[float], dict]:
     hw_vars = [r for r in vars if not r.is_computed]
     rw_funcs = {var.name: probe.get_func_args(var) for var in hw_vars}
 
-    vars = dict(stop=False)
+    state = dict(stop=False)
 
     def sigint_handler(sig, frame):
-        vars["stop"] = True
+        state["stop"] = True
 
     prev_handler = signal.signal(signal.SIGINT, sigint_handler)
 
@@ -44,10 +46,16 @@ def continuous_rw_vars(probe: BaseProbe, vars: list[Var],
     else:
         delta = -1
 
+    timer = None
     raw_data = {var.name: [] for var in hw_vars}
-    print("start ... (press CTRL-C to exit)", end="", flush=True)
+    if duration > 0:
+        print(f"start ... (duration: {duration}s, press CTRL-C to exit)", end="", flush=True)
+        timer = threading.Timer(duration, lambda: state.update(stop=True))
+        timer.start()
+    else:
+        print("start ... (press CTRL-C to exit)", end="", flush=True)
     times = [time.perf_counter()]
-    while not vars["stop"]:
+    while not state["stop"]:
         if (time.perf_counter() - times[-1]) < delta:
             continue
         times.append(time.perf_counter())
@@ -55,6 +63,8 @@ def continuous_rw_vars(probe: BaseProbe, vars: list[Var],
             val = rw_funcs[var.name][0](*rw_funcs[var.name][1])
             raw_data[var.name].append(val)
     print(" stop")
+    if timer is not None:
+        timer.cancel()
     signal.signal(signal.SIGINT, prev_handler)
     return times[1:], raw_data
 

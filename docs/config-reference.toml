@@ -2,6 +2,8 @@
 log_level = 'info'
 # Read/Write frequency (Hz). If unset, uses maximum frequency
 # rw_freq =
+# Read/Write duration (seconds). 0 = unlimited
+# rw_duration = 0
 # Actual read/write frequency deviation threshold (%), warns when below this
 rw_freq_warning_tolerance = 0.001
 # Actual read/write frequency deviation threshold (%), errors out when below this

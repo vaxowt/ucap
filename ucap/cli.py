@@ -8,22 +8,18 @@ import sys
 import time
 
 import click
-from click.shell_completion import (
-    CompletionItem,
-    ShellComplete,
-    add_completion_class,
-    split_arg_string,
-)
 import matplotlib.pyplot as plt
 import numpy as np
+from click.shell_completion import (CompletionItem, ShellComplete,
+                                    add_completion_class, split_arg_string)
 
 from ucap.config import Config, load_config
 from ucap.constants import CLI_NAME, LOG_FORMAT, LOGGER_NAME
 from ucap.elf import list_symbols, resolve_symbol_address
-from ucap.plot import create_figures_axes, is_default_axis_needed, plot_data
-from ucap.probe import (ProbeConnectionError, continuous_rw_vars,
-                          create_probe, rw_vars, unpack_continuous_data)
 from ucap.export import resolve_save_path, save_data
+from ucap.plot import create_figures_axes, is_default_axis_needed, plot_data
+from ucap.probe import (ProbeConnectionError, continuous_rw_vars, create_probe,
+                        rw_vars, unpack_continuous_data)
 
 logger = logging.getLogger(LOGGER_NAME)
 if not logger.handlers:
@@ -32,16 +28,21 @@ if not logger.handlers:
     logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
+
 def _config_opt(*, required=False):
-    return click.option('-c', '--config',
+    return click.option('-c',
+                        '--config',
                         type=click.Path(exists=True, dir_okay=False),
-                        required=required, help='configuration path')
+                        required=required,
+                        help='configuration path')
 
 
 def _elf_opt(*, required=False):
-    return click.option('-e', '--elf',
+    return click.option('-e',
+                        '--elf',
                         type=click.Path(exists=True, dir_okay=False),
-                        required=required, help='ELF file path')
+                        required=required,
+                        help='ELF file path')
 
 
 def _set_verbose(ctx, _, value):
@@ -61,6 +62,7 @@ _verbose_callback_opt = click.option('-v',
 
 
 class _OrderedGroup(click.Group):
+
     def list_commands(self, ctx):
         return list(self.commands)
 
@@ -161,9 +163,13 @@ def cli(ctx, list):
               '--force',
               is_flag=True,
               help='force override output dir contents')
+@click.option('-d',
+              '--duration',
+              type=click.FloatRange(min=0),
+              help='duration of rw in seconds (0 = unlimited)')
 @_verbose_callback_opt
 @click.pass_context
-def subcmd_rw(ctx, config, output_dir, name, force, elf):
+def subcmd_rw(ctx, config, output_dir, name, force, duration, elf):
 
     cfg: Config = load_config(config)
 
@@ -187,6 +193,8 @@ def subcmd_rw(ctx, config, output_dir, name, force, elf):
         cfg.save.name = name
     if force is not None:
         cfg.save.override = force
+    if duration is not None:
+        cfg.rw_duration = duration
     try:
         save_path = resolve_save_path(cfg.save)
     except FileExistsError as e:
@@ -217,7 +225,10 @@ def subcmd_rw(ctx, config, output_dir, name, force, elf):
         time.sleep(cfg.pre_delay)
 
     timestamp = time.time()
-    times, raw_data = continuous_rw_vars(dev, cfg.vars, freq=cfg.rw_freq)
+    times, raw_data = continuous_rw_vars(dev,
+                                         cfg.vars,
+                                         freq=cfg.rw_freq,
+                                         duration=cfg.rw_duration)
     logger.debug(raw_data)
 
     if cfg.post_delay > 0:
@@ -233,13 +244,18 @@ def subcmd_rw(ctx, config, output_dir, name, force, elf):
 
     dev.close()
 
+    if not times:
+        logger.warning('no samples collected, saving empty data')
+
+    actual_rw_freq = None
     if len(times) >= 2:
         actual_rw_freq = 1 / np.mean(np.diff(times))
         logger.info(
             f'rw_freq (Hz): target={cfg.rw_freq} actual={round(actual_rw_freq, 2)}'
         )
         if cfg.rw_freq:
-            rw_freq_error_percent = abs(actual_rw_freq - cfg.rw_freq) / cfg.rw_freq
+            rw_freq_error_percent = abs(actual_rw_freq -
+                                        cfg.rw_freq) / cfg.rw_freq
             if rw_freq_error_percent > cfg.rw_freq_error_tolerance:
                 logger.error(
                     f'the rw_freqs diff too much: {round(rw_freq_error_percent * 100, 4)}% (tolerance={cfg.rw_freq_error_tolerance * 100}%)'
@@ -252,14 +268,15 @@ def subcmd_rw(ctx, config, output_dir, name, force, elf):
     else:
         logger.warning('too few samples to compute rw_freq')
 
-    elapsed_time = times[-1] - times[0]
+    elapsed_time = times[-1] - times[0] if times else 0.
     logger.info(f'stats: elapsed={round(elapsed_time, 2)}s count={len(times)}')
 
-    times = (np.array(times) - times[0]).tolist()
+    if times:
+        times = (np.array(times) - times[0]).tolist()
     vars_data = unpack_continuous_data(cfg.vars, raw_data)
     logger.debug(vars_data)
 
-    if cfg.plot.show or (cfg.save.enable and cfg.save.save_figure):
+    if times and (cfg.plot.show or (cfg.save.enable and cfg.save.save_figure)):
         keep_default_axis = is_default_axis_needed(cfg.vars)
         figures, axes = create_figures_axes(cfg.plot, keep_default_axis)
         plot_data(cfg.vars, axes, times, vars_data)
@@ -285,7 +302,10 @@ def subcmd_rw(ctx, config, output_dir, name, force, elf):
     save_data(cfg.save, save_path, config_raw, data, metadata, figures)
 
     if cfg.plot.show:
-        plt.show()
+        if times:
+            plt.show()
+        else:
+            logger.warning('empty data, no plot shown')
 
 
 @cli.command('mon', help='monitor variables in real-time')
@@ -353,11 +373,14 @@ def subcmd_show(ctx, data_dir, config):
     vars_data = data['data']
     logger.debug(data)
 
-    keep_default_axis = is_default_axis_needed(cfg.vars)
-    _, axes = create_figures_axes(cfg.plot, keep_default_axis)
-    plot_data(cfg.vars, axes, times, vars_data)
+    if times:
+        keep_default_axis = is_default_axis_needed(cfg.vars)
+        _, axes = create_figures_axes(cfg.plot, keep_default_axis)
+        plot_data(cfg.vars, axes, times, vars_data)
 
-    plt.show()
+        plt.show()
+    else:
+        logger.warning('empty data, no plot shown')
 
 
 @cli.command('sym', help='list symbols in ELF file')

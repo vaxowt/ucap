@@ -4,7 +4,7 @@ from collections.abc import Iterable
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 # https://docs.python.org/3/library/struct.html#byte-order-size-and-alignment
 _BYTE_ORDER_CHARS = ['@', '=', '<', '>', '!']
@@ -245,6 +245,7 @@ class Config(BaseModel):
     log_level: LogLevel = LogLevel.info
     save: SaveConfig = SaveConfig()
     rw_freq: float | None = None
+    rw_duration: float = Field(default=0., ge=0)
     backend: BackendConfig = BackendConfig()
     rw_freq_warning_tolerance: float = 0.001
     rw_freq_error_tolerance: float = 0.01
