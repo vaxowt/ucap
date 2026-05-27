@@ -357,8 +357,7 @@ def subcmd_show(ctx, data_dir, config):
     _, axes = create_figures_axes(cfg.plot, keep_default_axis)
     plot_data(cfg.vars, axes, times, vars_data)
 
-    if cfg.plot.show:
-        plt.show()
+    plt.show()
 
 
 @cli.command('sym', help='list symbols in ELF file')
