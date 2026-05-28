@@ -1,4 +1,5 @@
 data/
+
 # Python-generated files
 __pycache__/
 *.py[oc]
@@ -9,6 +10,9 @@ wheels/
 
 # Virtual environments
 .venv
+
+# uv
+uv.lock
 
 # ai coding
 .deepseek
