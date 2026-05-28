@@ -1,10 +1,17 @@
+import logging
 import struct
+import sys
 import tomlkit
+import tomlkit.exceptions
 from collections.abc import Iterable
 from enum import Enum
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, ValidationError, model_validator
+
+from ucap.constants import LOGGER_NAME
+
+logger = logging.getLogger(LOGGER_NAME)
 
 # https://docs.python.org/3/library/struct.html#byte-order-size-and-alignment
 _BYTE_ORDER_CHARS = ['@', '=', '<', '>', '!']
@@ -282,7 +289,15 @@ def unpack_var_struct(struct: Iterable, values: Iterable):
 
 
 def load_config(path):
-    with open(path) as f:
-        config_dict = tomlkit.load(f).unwrap()
-    config = Config(**config_dict)
+    try:
+        with open(path) as f:
+            config_dict = tomlkit.load(f).unwrap()
+    except tomlkit.exceptions.TOMLKitError as e:
+        logger.error("failed to parse config file '%s': %s", path, e)
+        sys.exit(1)
+    try:
+        config = Config(**config_dict)
+    except ValidationError as e:
+        logger.error("invalid config: %s", e)
+        sys.exit(1)
     return config
